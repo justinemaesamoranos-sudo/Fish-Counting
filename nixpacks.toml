@@ -1,16 +1,30 @@
+[variables]
+NIXPACKS_PHP_VERSION = "8.2"
+
 [phases.setup]
-nixPkgs = ["php82", "php82Extensions.pdo", "php82Extensions.pdo_mysql", "php82Extensions.mbstring", "php82Extensions.tokenizer", "php82Extensions.xml", "php82Extensions.ctype", "php82Extensions.fileinfo", "php82Extensions.openssl", "php82Extensions.curl", "composer"]
+nixPkgs = [
+    "php82",
+    "php82Extensions.pdo",
+    "php82Extensions.pdo_mysql",
+    "php82Extensions.mbstring",
+    "php82Extensions.tokenizer",
+    "php82Extensions.xml",
+    "php82Extensions.ctype",
+    "php82Extensions.fileinfo",
+    "php82Extensions.openssl",
+    "php82Extensions.curl",
+    "php82Extensions.gd",
+    "composer"
+]
 
 [phases.install]
 cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
 
 [phases.build]
 cmds = [
-    "php artisan config:clear",
-    "php artisan route:clear",
-    "php artisan view:clear",
-    "php artisan storage:link"
+    "chmod +x start.sh",
+    "chmod -R 775 storage bootstrap/cache"
 ]
 
 [start]
-cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
+cmd = "bash start.sh"
