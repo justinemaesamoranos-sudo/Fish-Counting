@@ -14,7 +14,7 @@ nixPkgs = [
     "php82Extensions.openssl",
     "php82Extensions.curl",
     "php82Extensions.gd",
-    "composer"
+    "php82Packages.composer"
 ]
 
 [phases.install]
