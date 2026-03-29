@@ -61,39 +61,21 @@ class LiveCameraController extends Controller
             $fishCount = $data['fish_count'] ?? 0;
             $imageUrl = $data['image_url'] ?? "http://{$this->cameraIp}:{$this->cameraPort}/captured_images/{$fileName}";
 
-            
-
-            // Fetch the image from Flask
-            $imageResponse = Http::timeout(30)->get($imageUrl);
-
-            if (!$imageResponse->ok()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to fetch image from Flask server.'
-                ], 500);
-            }
-
-            $imageData = $imageResponse->body();
-
-            // Save image in Laravel storage
-            $storagePath = 'captures/' . $fileName;
-            Storage::disk('public')->put($storagePath, $imageData);
-
             // Get or create group ID for today
-            $todayDate = now()->toDateString(); // YYYY-MM-DD
+            $todayDate = now()->toDateString();
             $lastGroup = Image::whereDate('capture_date', $todayDate)
                 ->orderBy('group_id', 'desc')
                 ->first();
-            
+
             $groupId = $lastGroup ? $lastGroup->group_id : Image::max('group_id') + 1;
             if (!$groupId || $groupId <= 0) {
                 $groupId = 1;
             }
 
-            // Save record in database
+            // Save the Flask image URL directly — no local storage needed
             $image = new Image();
-            $image->file_path = 'storage/' . $storagePath;
-            $image->cage = 'Cage 1'; // can be dynamic later
+            $image->file_path = $imageUrl;
+            $image->cage = 'Cage 1';
             $image->count = $fishCount;
             $image->user_id = auth()->id();
             $image->group_id = $groupId;
@@ -104,7 +86,7 @@ class LiveCameraController extends Controller
                 'status' => 'success',
                 'file_name' => $fileName,
                 'fish_count' => $fishCount,
-                'image_url' => asset('storage/' . $storagePath)
+                'image_url' => $imageUrl
             ]);
 
         } catch (\Exception $e) {

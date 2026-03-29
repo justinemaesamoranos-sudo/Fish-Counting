@@ -474,7 +474,7 @@
 
                     @if($imageCounts->count() > 0)
                         <div class="detection-img-wrap">
-                            <img src="{{ asset($imageCounts->first()->file_path) }}" alt="Latest Detection">
+                            <img src="{{ Str::startsWith($imageCounts->first()->file_path, 'http') ? $imageCounts->first()->file_path : asset($imageCounts->first()->file_path) }}" alt="Latest Detection">
                             <div class="img-overlay">
                                 <span><i class="fas fa-hashtag"></i> {{ $imageCounts->first()->id }}</span>
                                 <span><i class="fas fa-calendar"></i> {{ $imageCounts->first()->created_at->format('M d, H:i') }}</span>

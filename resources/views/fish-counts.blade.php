@@ -511,9 +511,9 @@
                                     <td class="tc" style="font-weight:600; color:#004D73;">#{{ $img->id }}</td>
                                     <td class="tc">
                                         <img
-                                            src="{{ asset($img->file_path) }}"
+                                            src="{{ Str::startsWith($img->file_path, 'http') ? $img->file_path : asset($img->file_path) }}"
                                             class="fc-thumb clickable-image"
-                                            data-path="{{ asset($img->file_path) }}"
+                                            data-path="{{ Str::startsWith($img->file_path, 'http') ? $img->file_path : asset($img->file_path) }}"
                                             data-name="Image #{{ $img->id }}"
                                             alt="Capture #{{ $img->id }}"
                                         >
