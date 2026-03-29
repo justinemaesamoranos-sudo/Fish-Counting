@@ -1,0 +1,192 @@
+/* profile.css — Enhanced Premium Glassmorphism Profile UI */
+
+:root {
+  --primary: #2c3e50;
+  --accent: #00b4d8;
+  --accent-light: rgba(0, 180, 216, 0.15);
+  --accent-dark: #0077b6;
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --glass-white: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- Container & Card ---------- */
+.profile-edit-card {
+  max-width: 56rem;
+  margin: 4rem auto;
+  padding: 4.5rem;
+  border-radius: 1.8rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.15));
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.08), inset 0 0 12px rgba(255,255,255,0.2);
+  transition: all 0.4s cubic-bezier(.175,.885,.32,1.1);
+}
+.profile-edit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.1), inset 0 0 16px rgba(255,255,255,0.25);
+}
+
+/* ---------- Form Layout ---------- */
+.profile-form .form-flex {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 2.8rem;
+  margin-bottom: 3rem;
+}
+.profile-form label {
+  display: block;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1.5rem;
+  letter-spacing: .02em;
+}
+.profile-form small {
+  font-size: 1.3rem;
+  color: var(--text-secondary);
+  opacity: .8;
+}
+.form__input {
+  width: 100%;
+  padding: 1.4rem 1.8rem;
+  font-size: 1.6rem;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: .9rem;
+  background: var(--glass-white);
+  color: var(--text-primary);
+  transition: all .3s ease-out;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 1px 0 rgba(255,255,255,0.8);
+}
+.form__input::placeholder {
+  color: #a0aec0;
+  opacity: .7;
+}
+.profile-edit-card .form__input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 0 0 .4rem rgba(0,180,216,0.2), inset 0 1px 3px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+/* ---------- Button ---------- */
+.profile-form .btn {
+  width: 65%;
+  max-width: 26rem;
+  margin: 4rem auto 2.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  padding: 1.6rem 0;
+  border-radius: 1.2rem;
+  color: white;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border: none;
+  cursor: pointer;
+  background-size: 200% auto;
+  box-shadow: 0 4px 15px rgba(0,116,217,0.3), 0 2px 5px rgba(0,116,217,0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all .4s cubic-bezier(.39,.575,.565,1);
+}
+.profile-form .btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: .5s;
+}
+.profile-form .btn:hover {
+  background-position: right center;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0,116,217,0.4), 0 4px 10px rgba(0,116,217,0.3);
+}
+.profile-form .btn:hover::before {
+  left: 100%;
+}
+
+/* ---------- Success Alert ---------- */
+.alert.alert-success {
+  display: flex; align-items: center; gap: 1.2rem;
+  background: rgba(40,167,69,0.15);
+  border-left: 4px solid #28a745;
+  padding: 1.6rem 2rem;
+  border-radius: .8rem;
+  margin-bottom: 3rem;
+  color: #155724;
+  font-size: 1.5rem;
+  backdrop-filter: blur(5px);
+  animation: fadeIn .6s ease-out;
+}
+.alert.alert-success svg {
+  flex-shrink: 0;
+  width: 2rem; height: 2rem;
+  fill: #28a745;
+}
+
+/* ---------- Back Link ---------- */
+.back-btn {
+  text-align: center;
+  margin-top: 3rem;
+}
+.back-btn a {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 1rem 2.2rem;
+  border-radius: .8rem;
+  transition: all .3s ease;
+}
+.back-btn a:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  transform: translateX(-3px);
+}
+.back-btn svg {
+  width: 1.6rem; height: 1.6rem;
+  fill: currentColor;
+  transition: transform .3s ease;
+}
+.back-btn a:hover svg {
+  transform: translateX(-2px);
+}
+
+/* ---------- Error States ---------- */
+.profile-edit-card .error {
+  font-size: 1.4rem;
+  color: #d32f2f;
+  margin-top: .6rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.profile-edit-card .error svg {
+  width: 1.4rem; height: 1.4rem;
+  fill: currentColor;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .profile-edit-card { padding: 3.5rem 2.5rem; margin: 2.5rem auto; border-radius: 1.4rem; }
+  .profile-avatar { width: 10rem; height: 10rem; border-width: 6px; }
+  .profile-form .form-flex { grid-template-columns: 1fr; gap: 2.2rem; }
+  .profile-form .btn { width: 100%; max-width: none; }
+}
+@media (max-width: 480px) {
+  .profile-edit-card { padding: 3rem 2rem; border-radius: 1.2rem; }
+  .profile-avatar { width: 9rem; height: 9rem; }
+  .form__input { padding: 1.2rem 1.6rem; }
+}
