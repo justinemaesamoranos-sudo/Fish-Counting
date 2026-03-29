@@ -12,8 +12,14 @@ class LiveCameraController extends Controller
     /**
      * Raspberry Pi Flask camera IP and port
      */
-    private $cameraIp = '192.168.254.104'; // Update if Pi IP changes
-    private $cameraPort = 5000;
+    private $cameraIp;
+    private $cameraPort;
+
+    public function __construct()
+    {
+        $this->cameraIp   = env('FLASK_CAMERA_IP', '192.168.254.104');
+        $this->cameraPort = env('FLASK_CAMERA_PORT', 5000);
+    }
 
     /**
      * Show the live camera view.
