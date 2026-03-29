@@ -26,16 +26,31 @@ class LiveCameraController extends Controller
      */
     public function index()
     {
-        $cameraUrl = "http://{$this->cameraIp}:{$this->cameraPort}/video_feed";
+        $port = $this->cameraPort;
+        $ip   = $this->cameraIp;
+
+        // If using Cloudflare tunnel (port 443 or 80), use https without port
+        if ($port == 443 || $port == 80) {
+            $cameraUrl = "https://{$ip}/video_feed";
+        } else {
+            $cameraUrl = "http://{$ip}:{$port}/video_feed";
+        }
+
         return view('LiveCamera.index', compact('cameraUrl'));
     }
 
-    /**
-     * Capture a single frame from the Raspberry Pi Flask camera.
-     */
     public function capture(Request $request)
     {
-        $flaskCaptureUrl = "http://{$this->cameraIp}:{$this->cameraPort}/capture";
+        $port = $this->cameraPort;
+        $ip   = $this->cameraIp;
+
+        if ($port == 443 || $port == 80) {
+            $flaskBaseUrl    = "https://{$ip}";
+        } else {
+            $flaskBaseUrl    = "http://{$ip}:{$port}";
+        }
+
+        $flaskCaptureUrl = "{$flaskBaseUrl}/capture";
 
         try {
             // Send POST request to Flask
@@ -57,9 +72,9 @@ class LiveCameraController extends Controller
                 ], 500);
             }
 
-            $fileName = $data['image'] ?? 'unknown.jpg';
+            $fileName  = $data['image'] ?? 'unknown.jpg';
             $fishCount = $data['fish_count'] ?? 0;
-            $imageUrl = $data['image_url'] ?? "http://{$this->cameraIp}:{$this->cameraPort}/captured_images/{$fileName}";
+            $imageUrl  = $data['image_url'] ?? "{$flaskBaseUrl}/captured_images/{$fileName}";
 
             // Get or create group ID for today
             $todayDate = now()->toDateString();
