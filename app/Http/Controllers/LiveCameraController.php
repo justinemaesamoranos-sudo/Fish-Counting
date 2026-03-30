@@ -26,9 +26,15 @@ class LiveCameraController extends Controller
      */
     public function index()
     {
-        // Use Laravel's own proxy route for the stream
-        // so ngrok bypass header is sent automatically
-        $cameraUrl = route('live-camera.stream');
+        $port = $this->cameraPort;
+        $ip   = $this->cameraIp;
+
+        if ($port == 443 || $port == 80) {
+            $cameraUrl = "https://{$ip}/video_feed";
+        } else {
+            $cameraUrl = "http://{$ip}:{$port}/video_feed";
+        }
+
         return view('LiveCamera.index', compact('cameraUrl'));
     }
 
