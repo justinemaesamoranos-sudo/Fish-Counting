@@ -26,17 +26,43 @@ class LiveCameraController extends Controller
      */
     public function index()
     {
+        // Use Laravel's own proxy route for the stream
+        // so ngrok bypass header is sent automatically
+        $cameraUrl = route('live-camera.stream');
+        return view('LiveCamera.index', compact('cameraUrl'));
+    }
+
+    public function stream()
+    {
         $port = $this->cameraPort;
         $ip   = $this->cameraIp;
 
-        // If using Cloudflare tunnel (port 443 or 80), use https without port
         if ($port == 443 || $port == 80) {
-            $cameraUrl = "https://{$ip}/video_feed";
+            $streamUrl = "https://{$ip}/video_feed";
         } else {
-            $cameraUrl = "http://{$ip}:{$port}/video_feed";
+            $streamUrl = "http://{$ip}:{$port}/video_feed";
         }
 
-        return view('LiveCamera.index', compact('cameraUrl'));
+        $client = new \GuzzleHttp\Client();
+        $response = $client->request('GET', $streamUrl, [
+            'stream'  => true,
+            'headers' => ['ngrok-skip-browser-warning' => 'true'],
+            'timeout' => 0,
+        ]);
+
+        $body = $response->getBody();
+
+        return response()->stream(function () use ($body) {
+            while (!$body->eof()) {
+                echo $body->read(1024);
+                ob_flush();
+                flush();
+            }
+        }, 200, [
+            'Content-Type'      => 'multipart/x-mixed-replace; boundary=frame',
+            'Cache-Control'     => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function capture(Request $request)
@@ -54,7 +80,9 @@ class LiveCameraController extends Controller
 
         try {
             // Send POST request to Flask
-            $response = Http::timeout(30)->post($flaskCaptureUrl);
+            $response = Http::timeout(30)
+                ->withHeaders(['ngrok-skip-browser-warning' => 'true'])
+                ->post($flaskCaptureUrl);
 
             if (!$response->ok()) {
                 return response()->json([
