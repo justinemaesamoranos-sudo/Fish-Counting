@@ -43,26 +43,35 @@ class LiveCameraController extends Controller
             $streamUrl = "http://{$ip}:{$port}/video_feed";
         }
 
-        $client = new \GuzzleHttp\Client();
-        $response = $client->request('GET', $streamUrl, [
-            'stream'  => true,
-            'headers' => ['ngrok-skip-browser-warning' => 'true'],
-            'timeout' => 0,
-        ]);
+        try {
+            $client = new \GuzzleHttp\Client(['timeout' => 0, 'read_timeout' => 0]);
+            $response = $client->request('GET', $streamUrl, [
+                'stream'  => true,
+                'headers' => [
+                    'ngrok-skip-browser-warning' => 'true',
+                    'User-Agent' => 'FishCountApp/1.0',
+                ],
+            ]);
 
-        $body = $response->getBody();
+            $contentType = $response->getHeaderLine('Content-Type') ?: 'multipart/x-mixed-replace; boundary=frame';
+            $body = $response->getBody();
 
-        return response()->stream(function () use ($body) {
-            while (!$body->eof()) {
-                echo $body->read(1024);
-                ob_flush();
-                flush();
-            }
-        }, 200, [
-            'Content-Type'      => 'multipart/x-mixed-replace; boundary=frame',
-            'Cache-Control'     => 'no-cache',
-            'X-Accel-Buffering' => 'no',
-        ]);
+            return response()->stream(function () use ($body) {
+                while (!$body->eof()) {
+                    echo $body->read(4096);
+                    if (ob_get_level() > 0) ob_flush();
+                    flush();
+                    if (connection_aborted()) break;
+                }
+            }, 200, [
+                'Content-Type'      => $contentType,
+                'Cache-Control'     => 'no-cache, no-store',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+            ]);
+        } catch (\Exception $e) {
+            return response('Stream unavailable: ' . $e->getMessage(), 503);
+        }
     }
 
     public function capture(Request $request)
