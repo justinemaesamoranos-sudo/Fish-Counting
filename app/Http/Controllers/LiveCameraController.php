@@ -40,6 +40,26 @@ class LiveCameraController extends Controller
         return view('LiveCamera.index', compact('cameraUrl', 'fishCountUrl'));
     }
 
+    public function fishCount()
+    {
+        $port = $this->cameraPort;
+        $ip   = $this->cameraIp;
+
+        $baseUrl = ($port == 443 || $port == 80)
+            ? "https://{$ip}"
+            : "http://{$ip}:{$port}";
+
+        try {
+            $response = Http::timeout(3)
+                ->withHeaders(['ngrok-skip-browser-warning' => 'true'])
+                ->get("{$baseUrl}/fish_count");
+
+            return response()->json($response->json());
+        } catch (\Exception $e) {
+            return response()->json(['fish_count' => 0]);
+        }
+    }
+
     public function stream()
     {
         $port = $this->cameraPort;

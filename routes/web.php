@@ -47,5 +47,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/live-camera', [LiveCameraController::class, 'index'])->name('live-camera');
     Route::get('/live-camera/stream', [LiveCameraController::class, 'stream'])->name('live-camera.stream');
     Route::post('/live-camera/capture', [LiveCameraController::class, 'capture'])->name('live-camera.capture');
+    Route::get('/live-camera/fish-count', [LiveCameraController::class, 'fishCount'])->name('live-camera.fish-count');
 
 });

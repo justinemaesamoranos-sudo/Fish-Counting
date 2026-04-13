@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Poll the Pi every 3 seconds for fish count, auto-capture when fish detected
     function pollFishCount() {
-        fetch("{{ $fishCountUrl }}", { signal: AbortSignal.timeout(5000) })
+        fetch("{{ route('live-camera.fish-count') }}", { signal: AbortSignal.timeout(5000) })
             .then(function(res) { return res.json(); })
             .then(function(data) {
                 const count = data.fish_count ?? 0;
