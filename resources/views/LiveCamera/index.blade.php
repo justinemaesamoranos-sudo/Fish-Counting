@@ -163,81 +163,47 @@
         background: #fafcfd;
     }
 
-    /* ── Capture button ── */
-    .lc-capture-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.6rem;
+    /* ── Auto capture status ── */
+    .lc-auto-status {
+        width: 100%;
+        background: linear-gradient(135deg, #e8f4f8, #d0e8f0);
+        border-radius: 12px;
+        border: 1px solid #b8dce8;
+        padding: 1rem;
+        text-align: center;
     }
 
-    #capture-btn {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        border: none;
-        background: linear-gradient(145deg, #005f80, #0088AA);
-        color: #fff;
-        cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.3rem;
-        font-size: 0.72rem;
+    .lc-auto-status-lbl {
+        font-size: 0.7rem;
         font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        box-shadow:
-            0 4px 16px rgba(0,136,170,0.4),
-            0 0 0 6px rgba(0,136,170,0.12),
-            0 0 0 12px rgba(0,136,170,0.05);
-        transition: all 0.25s ease;
-        position: relative;
-    }
-
-    #capture-btn i { font-size: 1.7rem; }
-
-    #capture-btn::after {
-        content: '';
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        border: 2px solid rgba(0,136,170,0.25);
-        animation: ringpulse 2s infinite;
-    }
-
-    @keyframes ringpulse {
-        0%   { transform: scale(1);   opacity: 0.6; }
-        70%  { transform: scale(1.15); opacity: 0; }
-        100% { transform: scale(1.15); opacity: 0; }
-    }
-
-    #capture-btn:hover:not(:disabled) {
-        transform: scale(1.06);
-        box-shadow:
-            0 8px 24px rgba(0,136,170,0.5),
-            0 0 0 8px rgba(0,136,170,0.15),
-            0 0 0 16px rgba(0,136,170,0.06);
-    }
-
-    #capture-btn:active:not(:disabled) {
-        transform: scale(0.96);
-    }
-
-    #capture-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none;
-        animation: none;
-    }
-
-    .lc-capture-label {
-        font-size: 0.75rem;
-        font-weight: 600;
         color: #0088AA;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
+        margin-bottom: 0.5rem;
+    }
+
+    .lc-auto-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #004D73;
+    }
+
+    .lc-auto-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 6px rgba(74,222,128,0.8);
+        animation: livepulse 1.5s infinite;
+    }
+
+    .lc-auto-dot.capturing {
+        background: #f59e0b;
+        box-shadow: 0 0 6px rgba(245,158,11,0.8);
     }
 
     /* ── Loader ── */
@@ -375,12 +341,12 @@
             {{-- Controls --}}
             <div class="lc-controls-col">
 
-                <div class="lc-capture-wrap">
-                    <button id="capture-btn">
-                        <i class="fas fa-camera"></i>
-                        Capture
-                    </button>
-                    <span class="lc-capture-label">Click to capture</span>
+                <div class="lc-auto-status">
+                    <div class="lc-auto-status-lbl">Auto Capture</div>
+                    <div class="lc-auto-indicator">
+                        <span class="lc-auto-dot" id="auto-dot"></span>
+                        <span id="auto-status-text">Monitoring...</span>
+                    </div>
                 </div>
 
                 <span id="capture-loader">
@@ -407,14 +373,16 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const captureBtn       = document.getElementById('capture-btn');
     const loader           = document.getElementById('capture-loader');
     const fishCountDisplay = document.getElementById('fish-count-display');
     const flashDiv         = document.getElementById('flash-messages');
     const liveFeed         = document.getElementById('liveFeed');
     const streamError      = document.getElementById('stream-error');
+    const autoDot          = document.getElementById('auto-dot');
+    const autoStatusText   = document.getElementById('auto-status-text');
 
     let streamRetryTimer = null;
+    let isCapturing      = false;
 
     liveFeed.addEventListener('error', function () {
         streamError.style.display = 'flex';
@@ -444,11 +412,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 4000);
     }
 
-    captureBtn.addEventListener('click', function () {
-        captureBtn.disabled            = true;
-        loader.style.display           = 'inline-flex';
-        flashDiv.innerHTML             = '';
-        fishCountDisplay.textContent   = '—';
+    function doCapture() {
+        if (isCapturing) return;
+        isCapturing = true;
+
+        autoDot.classList.add('capturing');
+        autoStatusText.textContent   = 'Capturing...';
+        loader.style.display         = 'inline-flex';
         fishCountDisplay.style.opacity = '0.4';
 
         const controller = new AbortController();
@@ -471,16 +441,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.status === 'success') {
                 fishCountDisplay.textContent   = data.fish_count ?? 0;
                 fishCountDisplay.style.opacity = '1';
-                showFlash('success', 'Captured successfully. Fish count updated.');
+                showFlash('success', 'Auto-captured. Fish count: ' + (data.fish_count ?? 0));
             } else {
-                fishCountDisplay.textContent   = '0';
                 fishCountDisplay.style.opacity = '1';
                 showFlash('danger', 'Capture failed: ' + (data.message ?? 'Unknown error'));
             }
         })
         .catch(function(err) {
             clearTimeout(timeout);
-            fishCountDisplay.textContent   = '0';
             fishCountDisplay.style.opacity = '1';
             const msg = err.name === 'AbortError'
                 ? 'Capture timed out. Check that the Pi is reachable.'
@@ -489,9 +457,31 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .finally(function() {
             loader.style.display = 'none';
-            captureBtn.disabled  = false;
+            autoDot.classList.remove('capturing');
+            autoStatusText.textContent = 'Monitoring...';
+            // cooldown 10 seconds before next auto-capture
+            setTimeout(function() { isCapturing = false; }, 10000);
         });
-    });
+    }
+
+    // Poll the Pi every 3 seconds for fish count, auto-capture when fish detected
+    function pollFishCount() {
+        fetch("{{ $fishCountUrl }}", { signal: AbortSignal.timeout(5000) })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                const count = data.fish_count ?? 0;
+                fishCountDisplay.textContent   = count;
+                fishCountDisplay.style.opacity = '1';
+                if (count > 0) {
+                    doCapture();
+                }
+            })
+            .catch(function() {
+                // silently ignore poll errors
+            });
+    }
+
+    setInterval(pollFishCount, 3000);
 });
 </script>
 @endsection

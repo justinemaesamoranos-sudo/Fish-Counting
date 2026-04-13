@@ -30,12 +30,14 @@ class LiveCameraController extends Controller
         $ip   = $this->cameraIp;
 
         if ($port == 443 || $port == 80) {
-            $cameraUrl = "https://{$ip}/video_feed";
+            $cameraUrl    = "https://{$ip}/video_feed";
+            $fishCountUrl = "https://{$ip}/fish_count";
         } else {
-            $cameraUrl = "http://{$ip}:{$port}/video_feed";
+            $cameraUrl    = "http://{$ip}:{$port}/video_feed";
+            $fishCountUrl = "http://{$ip}:{$port}/fish_count";
         }
 
-        return view('LiveCamera.index', compact('cameraUrl'));
+        return view('LiveCamera.index', compact('cameraUrl', 'fishCountUrl'));
     }
 
     public function stream()
